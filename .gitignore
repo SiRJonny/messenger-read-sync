@@ -1,0 +1,12 @@
+# Build outputs
+build/
+.gradle/
+
+# Android Studio / local config
+local.properties
+captures/
+
+# Signing secrets — never publish
+*.keystore
+keystore.properties
+*.jks

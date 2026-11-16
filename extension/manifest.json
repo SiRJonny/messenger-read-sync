@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Messenger Read Sync",
+  "version": "1.0",
+  "description": "Tells your phone to clear a Messenger notification when you read the chat on PC.",
+  "permissions": ["alarms", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "host_permissions": ["http://*/*"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.messenger.com/*",
+        "https://www.facebook.com/messages/*"
+      ],
+      "js": ["content.js"]
+    }
+  ]
+}
