@@ -6,8 +6,12 @@ const RETRY_ALARM = "readsync-retry";
 const MAX_ATTEMPTS = 10; // 1 per minute
 
 function post(cfg, payload) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { "Content-Type": "application/json; charset=utf-8" };
   if (cfg.token) headers["Authorization"] = "Bearer " + cfg.token;
+  // Base64 header dodges charset mangling of accented names (ó/ű/...) in
+  // the POST body on the phone's HTTP server.
+  const bytes = new TextEncoder().encode(payload.thread);
+  headers["X-Thread-Name"] = btoa(String.fromCharCode(...bytes));
   return fetch(cfg.phoneUrl, {
     method: "POST",
     headers,

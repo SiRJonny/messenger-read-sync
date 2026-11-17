@@ -30,7 +30,11 @@ class ReadServer(
 
         val body = readBody(session)
         val thread = try {
-            JSONObject(body).optString("thread", "")
+            // Prefer the Base64 header: exact UTF-8 regardless of how
+            // NanoHTTPD decoded the body bytes.
+            session.headers["x-thread-name"]?.let {
+                String(java.util.Base64.getDecoder().decode(it), Charsets.UTF_8)
+            } ?: JSONObject(body).optString("thread", "")
         } catch (_: Exception) {
             ""
         }

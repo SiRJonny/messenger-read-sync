@@ -36,6 +36,21 @@
   }
 
   const wasUnread = new Map(); // threadId -> list item text while unread
+  const lastPreview = new Map(); // threadId -> normalized preview text
+
+  function normalizePreview(text) {
+    let t = text.replace(/\s+/g, " ").trim();
+    // Strip the relative timestamp ("· 4 p.") — it changes every minute.
+    const i = t.lastIndexOf("·");
+    if (i >= 0) t = t.slice(0, i).trim();
+    // Strip presence prefix — toggles with the contact's online status.
+    return t.replace(/^Most aktív\.\s*/i, "").replace(/^Active now\.\s*/i, "");
+  }
+
+  function currentThreadId() {
+    const m = location.pathname.match(/\/t\/([^/]+)/);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
 
   function fire(id, triesLeft) {
     try {
@@ -70,6 +85,15 @@
           wasUnread.delete(id);
           fire(id, 8);
         }
+        // Open + focused chat: incoming messages are marked read
+        // instantly, so no unread marker ever appears. The only visible
+        // signal is the list preview changing (sender/text changed).
+        const norm = normalizePreview(text);
+        const prev = lastPreview.get(id);
+        if (prev !== undefined && prev !== norm && !unread) {
+          if (id === currentThreadId() && document.hasFocus()) fire(id, 8);
+        }
+        lastPreview.set(id, norm);
       }
     } catch (e) {
       console.error("readsync poll error:", e);
